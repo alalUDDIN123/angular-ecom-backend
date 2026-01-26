@@ -2,9 +2,9 @@ const express = require("express");
 const cors=require("cors");
 const app = express();
 
-// const authRoutes = require("./routes/auth.routes");
+const authRoutes = require("./routes/auth.routes");
 const productRoutes = require("./routes/product.routes");
-// const cartRoutes = require("./routes/cart.routes");
+const cartRoutes = require("./routes/cart.routes");
 
 /* =========================
    Middlewares
@@ -64,9 +64,9 @@ app.get("/", (req, res) => {
 /* =========================
    API Routes
 ========================= */
-// app.use("/api/auth",authRoutes);
+app.use("/api/auth",authRoutes);
 app.use("/api/products",productRoutes);
-// app.use("/api/cart",cartRoutes);
+app.use("/api/cart",cartRoutes);
 
 /* =========================
    404 Not Found Handler
