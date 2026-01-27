@@ -134,19 +134,32 @@ const getUserCart = async (req, res) => {
 ========================= */
 const removeCartItem = async (req, res) => {
   try {
-    const { cartItemId } = req.params;
-
-    if (!cartItemId) {
+    const { cartItemId, userId, productId } = req.body;
+    if(!cartItemId && !(userId && productId)) {
       return sendResponse(res, {
         success: false,
         statusCode: 400,
-        message: "Cart item id is required",
+        message: "Cart item id or user id and product id is required",
         data: null
       });
     }
 
-    const deletedItem = await CartModel.findByIdAndDelete(cartItemId);
+    let deletedItem = null;
 
+    // Case 1: Remove by cartItemId (Cart page)
+    if (cartItemId) {
+      deletedItem = await CartModel.findByIdAndDelete(cartItemId);
+    }
+
+    // Case 2: Remove by productId + userId (Product page)
+    else if (userId && productId) {
+      deletedItem = await CartModel.findOneAndDelete({
+        userId,
+        productId
+      });
+    }
+
+    // Validation
     if (!deletedItem) {
       return sendResponse(res, {
         success: false,
@@ -172,6 +185,7 @@ const removeCartItem = async (req, res) => {
     });
   }
 };
+
 
 
 const cartController = {
