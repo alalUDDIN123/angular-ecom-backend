@@ -1,52 +1,100 @@
-const ProductModel = require("../models/Product");
 
+const ProductModel = require("../models/Product.js");
+const { sendResponse } = require("../utils/apiResponse.ts");
 
-// ADD PRODUCT
+/* =========================
+   ADD PRODUCT (SELLER)
+========================= */
 const createProduct = async (req, res) => {
-  const product = new ProductModel(req.body);
-  await product.save();
-  res.status(201).json(product);
+  try {
+    const product = await ProductModel.create(req.body);
+
+    return sendResponse(res, {
+      success: true,
+      statusCode: 201,
+      message: "Product created successfully",
+      data: product
+    });
+  } catch (error) {
+    return sendResponse(res, {
+      success: false,
+      statusCode: 400,
+      message: "Failed to create product",
+      errors: error.message
+    });
+  }
 };
 
-// GET ALL PRODUCTS
+/* =========================
+   GET ALL PRODUCTS
+========================= */
 const getAllProducts = async (req, res) => {
-  const products = await ProductModel.find();
-  res.json(products);
+  try {
+    const products = await ProductModel.find().sort({ createdAt: -1 });
+
+    return sendResponse(res, {
+      success: true,
+      statusCode: 200,
+      message: "Products fetched successfully",
+      data: products
+    });
+  } catch (error) {
+    return sendResponse(res, {
+      success: false,
+      statusCode: 500,
+      message: "Failed to fetch products",
+      errors: error.message
+    });
+  }
 };
 
-// GET SINGLE PRODUCT
+/* =========================
+   GET SINGLE PRODUCT
+========================= */
 const getSingleProduct = async (req, res) => {
   try {
     const { id } = req.params;
 
-    const product = await ProductModel.findById({ _id: id });
+    const product = await ProductModel.findById(id);
 
     if (!product) {
-      return res.status(404).json({
+      return sendResponse(res, {
         success: false,
-        message: "Product not found"
+        statusCode: 404,
+        message: "Product not found",
+        data: null
       });
     }
 
-    res.json(product);
+    return sendResponse(res, {
+      success: true,
+      statusCode: 200,
+      message: "Product fetched successfully",
+      data: product
+    });
   } catch (error) {
-    res.status(400).json({
+    return sendResponse(res, {
       success: false,
-      message: "Invalid product id"
+      statusCode: 400,
+      message: "Invalid product id",
+      errors: error.message
     });
   }
-}
+};
 
-// SEARCH PRODUCT
-
+/* =========================
+   SEARCH PRODUCT
+========================= */
 const searchProduct = async (req, res) => {
   try {
-    const { q } = req.query;
+    const { q } = req.query 
 
     if (!q) {
-      return res.status(400).json({
+      return sendResponse(res, {
         success: false,
-        message: "Search query is required"
+        statusCode: 400,
+        message: "Search query is required",
+        data: null
       });
     }
 
@@ -58,32 +106,105 @@ const searchProduct = async (req, res) => {
       ]
     });
 
-    res.json(products);
+    return sendResponse(res, {
+      success: true,
+      statusCode: 200,
+      message: "Search results fetched successfully",
+      data: products
+    });
   } catch (error) {
-    res.status(500).json({
+    return sendResponse(res, {
       success: false,
-      message: "Search failed"
+      statusCode: 500,
+      message: "Search failed",
+      errors: error.message
     });
   }
-}
+};
 
-// GET ALL PRODUCTS
+/* =========================
+   EDIT PRODUCT (SELLER)
+========================= */
 const editProduct = async (req, res) => {
+  try {
+    const { id } = req.params;
 
-  res.json({ message: "Edit product endpoint" });
+    const updatedProduct = await ProductModel.findByIdAndUpdate(
+      id,
+      req.body,
+      {
+        new: true,
+        runValidators: true
+      }
+    );
+
+    if (!updatedProduct) {
+      return sendResponse(res, {
+        success: false,
+        statusCode: 404,
+        message: "Product not found",
+        data: null
+      });
+    }
+
+    return sendResponse(res, {
+      success: true,
+      statusCode: 200,
+      message: "Product updated successfully",
+      data: updatedProduct
+    });
+  } catch (error) {
+    return sendResponse(res, {
+      success: false,
+      statusCode: 400,
+      message: "Failed to update product",
+      errors: error.message
+    });
+  }
 };
-// GET ALL PRODUCTS
-const deleteProduct = async (req, res) => {
-  res.json({ message: "Delete product endpoint" });
+
+/* =========================
+   DELETE PRODUCT (SELLER)
+========================= */
+ const deleteProduct = async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    const deletedProduct = await ProductModel.findByIdAndDelete(id);
+
+    if (!deletedProduct) {
+      return sendResponse(res, {
+        success: false,
+        statusCode: 404,
+        message: "Product not found",
+        data: null
+      });
+    }
+
+    return sendResponse(res, {
+      success: true,
+      statusCode: 200,
+      message: "Product deleted successfully",
+      data: null
+    });
+  } catch (error) {
+    return sendResponse(res, {
+      success: false,
+      statusCode: 400,
+      message: "Failed to delete product",
+      errors: error.message
+    });
+  }
 };
+
+
 const productController = {
-  getAllProducts,
+  createProduct,
+  getAllProducts, 
   getSingleProduct,
   searchProduct,
-  createProduct,
   editProduct,
   deleteProduct
-
 };
 
 module.exports = { productController };

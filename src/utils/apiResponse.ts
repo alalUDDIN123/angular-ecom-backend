@@ -13,21 +13,12 @@ export const sendResponse = <T>(
   res: Response,
   options: ApiResponse<T>
 ) => {
-  const {
-    success,
-    statusCode,
-    message,
-    data = null,
-    errors = null,
-    meta = null
-  } = options;
-
-  return res.status(statusCode).json({
-    success,
-    statusCode,
-    message,
-    data,
-    errors,
-    meta
+  return res.status(options.statusCode).json({
+    success: options.success,
+    statusCode: options.statusCode,
+    message: options.message,
+    data: options.data ?? null,
+    errors: options.errors ?? null,
+    meta: options.meta ?? null
   });
 };
