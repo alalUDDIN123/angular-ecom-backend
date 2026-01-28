@@ -61,6 +61,10 @@ app.get("/", (req, res) => {
   `);
 });
 
+app.get("/api", (req, res) => {
+  res.json({ message: "Angular E-Commerce Backend running 🚀" });
+});
+
 /* =========================
    API Routes
 ========================= */
